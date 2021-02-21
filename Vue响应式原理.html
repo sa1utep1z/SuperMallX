@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 1.app.message修改数据，Vue内部是如何监听message数据的改变？
+  Object.defineProperty -> 监听对象属性的改变
+  2.当数据发生改变，Vue是如何知道要通知哪些地方？以及界面发生了刷新的呢
+  《发布订阅者模式》 -->
+
+  <div id="app">
+    {{message}}
+    {{message}}
+    {{message}}
+    {{name}}
+  </div>
+
+  <script src="./node_modules/vue/dist/vue.js"></script>
+  <script>
+    const app = new Vue({
+      el:'#app',
+      data:{
+        message:'哈哈哈',
+        name:'hhh'
+      }
+    })
+  </script>
+
+
+  <script>
+      const obj = {
+        message:'呵呵呵',
+        name:'hahaha'
+      }
+
+      //观察者对象！
+      //监听属性的改变以及获取相对应的值（value）
+      Object.keys(obj).forEach(key=>{
+        let value = obj[key]
+        Object.defineProperty(obj,key,{
+          set(newValue){
+            // console.log('监听'+key+'改变');
+            value = newValue;
+            // dep.notify()
+          },
+          get(){
+            // console.log('获取'+key+'对应的值')
+            return value
+          }
+        })
+      })
+      // obj.name = "55555"
+
+      //发布者订阅者模式
+      //发布者
+      class Dep {
+        constructor(){
+          this.subs = []
+        }
+        addSub(watcher){
+          this.subs.push(watcher)
+        }
+        notify(){
+          this.subs.forEach(item =>{
+            item.update() 
+          })
+        }
+      }
+      //订阅者
+      class Watcher{
+        constructor(name){
+          this.name = name;
+        }
+        update(){
+          console.log(this.name + '发生update' );
+        }
+      }
+
+      const dep = new Dep()
+
+      const w1 = new Watcher('啊1')
+      dep.addSub(w1)
+      const w2 = new Watcher('啊2')
+      dep.addSub(w2)
+      const w3 = new Watcher('啊3')
+      dep.addSub(w3)
+
+      dep.notify()
+
+      // var o={}
+      // Object.defineProperty(o,'a',{
+      //   value:12,
+      //   writable:false
+      // })
+      // console.log(o.a)
+      // o.a = 25
+      // console.log(o.a);
+      // // console.log(Object.keys(obj).forEach(obj))
+
+      // // strict mode
+      // (function(){
+      //   'use strict';
+      //   var o ={};
+      //   Object.defineProperty(o,'b',{
+      //     value:2,
+      //     writable:false
+      //   });
+      //   o.b = 3;
+      //   return o.b
+      // })()
+  </script>
+</body>
+</html>
